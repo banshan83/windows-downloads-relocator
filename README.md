@@ -5,6 +5,9 @@
 > Safely relocate the Windows **Downloads** known folder to another drive. Fixes the hidden `Local Downloads` registry entry that the navigation pane actually reads, blocks the "whole drive = Downloads" mistake, keeps the localized name (下载) and icon via `desktop.ini`, migrates existing files completely, and syncs common apps' default download directories (Chromium / Edge, Firefox, WeChat, QQ, Baidu / Quark / Ali Netdisk).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6.svg)](https://github.com/banshan83/windows-downloads-relocator)
+[![PowerShell](https://img.shields.io/badge/powershell-5.1%2B-blue.svg)](https://github.com/banshan83/windows-downloads-relocator)
 
 ---
 
@@ -16,6 +19,20 @@
 - **文件迁移完整 / Complete migration** — `robocopy /MOVE` 为主、`Move-Item` 兜底，旧下载文件原样搬入新位置。
 - **软件下载路径同步 / App sync** — 自动设置 Chromium/Edge、Firefox、微信、QQ、百度网盘、夸克网盘、阿里云盘的默认下载目录（尽力而为，无法自动改的给出手动指引）。
 - **安全回退 / Safe rollback** — 执行前自动导出 `.reg` 备份，一键导入即可还原。
+
+---
+
+## 版本 / Version
+
+当前版本：**v1.0.0**（变更记录见 [`CHANGELOG.md`](CHANGELOG.md)）。
+
+版本号遵循 [语义化版本 2.0.0](https://semver.org/lang/zh-CN/)（`主版本.次版本.修订号`）：
+
+- **主版本**：迁移脚本逻辑 / 注册表键位发生破坏性变更时递增；
+- **次版本**：新增支持的软件、新增功能或明显增强时递增；
+- **修订号**：文档、文案、Bug 修复等向后兼容的改动时递增。
+
+发版步骤：更新本文件版本号 → 在 `CHANGELOG.md` 追加条目 → `git tag vX.Y.Z` → 在 GitHub 发布对应 Release（可附 `dist/windows-downloads-relocator.zip`）。
 
 ---
 

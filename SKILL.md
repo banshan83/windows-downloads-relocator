@@ -2,6 +2,7 @@
 name: windows-downloads-relocator
 description: "Relocate the Windows Downloads known folder to another drive. Fixes the hidden Local Downloads registry entry that the navigation pane actually uses, blocks the whole-drive-equals-Downloads mistake, keeps the localized display name (下载) and icon via desktop.ini, migrates existing files completely, and syncs common apps default download dirs (Chromium, Firefox, WeChat, Baidu/Quark/Ali Netdisk, QQ). 将 Windows 下载已知文件夹迁移到其他盘，修复隐藏的 Local Downloads 注册表项、规避整盘等于下载陷阱、保持中文名与图标一致、完整迁移文件，并同步浏览器与百度网盘/夸克网盘/阿里云盘/QQ/微信等软件的下载路径。"
 agent_created: true
+version: 1.0.0
 ---
 
 # Windows 下载文件夹迁移器（Downloads Relocator）
