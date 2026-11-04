@@ -100,7 +100,7 @@ Windows 的「下载」不是一个普通文件夹，而是一个 **Known Folder
 
 ## 许可证 / License
 
-[MIT](LICENSE) © 2026 The Windows Downloads Relocator Authors
+[MIT](LICENSE) © 2026 banshan83
 
 ---
 
