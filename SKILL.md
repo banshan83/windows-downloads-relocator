@@ -1,219 +1,181 @@
 ---
 name: windows-downloads-relocator
-description: "Relocate the Windows Downloads known folder to another drive. Fixes the hidden Local Downloads registry entry that the navigation pane actually uses, blocks the whole-drive-equals-Downloads mistake, keeps the localized display name (下载) and icon via desktop.ini, migrates existing files completely, and syncs common apps default download dirs (Chromium, Firefox, WeChat, Baidu/Quark/Ali Netdisk, QQ). 将 Windows 下载已知文件夹迁移到其他盘，修复隐藏的 Local Downloads 注册表项、规避整盘等于下载陷阱、保持中文名与图标一致、完整迁移文件，并同步浏览器与百度网盘/夸克网盘/阿里云盘/QQ/微信等软件的下载路径。"
+description: "Relocate the Windows Downloads known folder to a dedicated sub-folder on another drive, with pre-flight checks, verified per-file migration, complete registry backups and an honest pass/fail report. Fixes the hidden Local Downloads GUID, rejects bare drive roots so the whole disk never becomes Downloads, keeps the localized display name and icon via desktop.ini, syncs common apps download paths, and includes a dry-run, a rollback script and an automated selftest. 将 Windows 下载已知文件夹安全迁移到其他盘：迁移前全面检查、逐文件校验迁移、注册表完整备份与明确失败汇总；修复隐藏的 Local Downloads 注册表项、拒绝把整盘设为下载目录、保持中文名与图标、同步浏览器与微信 / QQ / 百度网盘 / 夸克网盘 / 阿里云盘下载路径，并提供只读预览、回退脚本与自动自检。"
 agent_created: true
-version: 1.0.0
+version: 1.1.0
 ---
 
-# Windows 下载文件夹迁移器（Downloads Relocator）
+# Windows 下载文件夹迁移器 / Downloads Relocator
 
-**English:** A ready-to-run toolkit that moves the Windows **Downloads** known folder
-off the C: drive to any sub-folder on another disk, and makes sure the OS, the
-Explorer navigation pane, the localized name (下载), the icon, and your everyday
-apps all point at the new location.
+把「下载」已知文件夹（Known Folder）从 C 盘迁到**其他盘上的专用子文件夹**，并让系统、导航栏、显示名称、图标和常用软件都指向新位置。
+*Moves the Downloads Known Folder to a dedicated sub-folder on another drive and keeps the OS, nav pane, localized name, icon and apps in sync.*
 
-**中文：** 把 Windows 的「下载」已知文件夹从 C 盘迁移到其他盘/路径，并确保系统默认
-下载指向新文件夹、图标与中文名（「下载」二字）一致、旧文件完整迁移、常见软件（浏览器、
-微信、百度网盘、夸克网盘、阿里云盘、QQ 等）的下载目录一并改为新路径。
+> v1.1.0 重点修复了 v1.0.0 的三个可靠性缺陷：脚本无法启动、`-DryRun` 仍写备份、失败被报告成成功。详见 `CHANGELOG.md`。
+> *v1.1.0 fixes three v1.0.0 reliability defects: the script could not start, DryRun still wrote backups, and failures were reported as success.*
 
-## 概述 / Overview
-
-把 Windows 的“下载”已知文件夹（Known Folder）从 C 盘迁移到其他盘/路径，并确保：
-
-1. 系统默认下载指向新文件夹；
-2. 图标与中文名（“下载”二字）一致性；
-3. 旧下载文件的完整迁移；
-4. 常见软件（浏览器、微信、网盘、QQ 等）的默认下载目录一并改为新路径。
-
-The toolkit encodes the hard-won lessons from a real support case where a
-"Properties → Location → Move" migration to another disk silently turned the
-**entire F: drive** into the Downloads folder. Two hidden traps caused it; both are
-now handled automatically.
-
-本技能沉淀自一次真实排障：用户用「属性 → 位置 → 移动」把下载目录迁到别的盘，结果
-**整块 F 盘**被当成下载目录。根因有两个隐藏点，本技能已彻底处理。
+---
 
 ## 何时使用 / When to use
 
-- 想把“下载”文件夹从 C 盘挪到 D/E/F 等其他盘，释放系统盘空间；
-  *Move Downloads off the C: drive to free system-disk space.*
-- 用户的“下载”目录错误地指向了**整个盘符根目录**（如 `F:\`），打开下载看到整盘杂乱内容；
-  *Downloads is wrongly pointed at a whole drive root (e.g. `F:\`) and shows the
-  whole disk's mess.*
-- 需要把浏览器、微信、网盘、QQ 等的下载保存位置批量改到新目录。
-  *Bulk-redirect download paths across browsers, WeChat, netdisks and QQ.*
+- 想释放 C 盘空间，把「下载」挪到 D/E/F 盘。*Free system-disk space.*
+- 「下载」错误地指向了**整个盘符根**（如 `F:\`），打开后看到整盘内容。*Downloads wrongly points at a whole drive root.*
+- 属性里看着改对了，但左侧导航栏的「下载」仍指向老位置。*Nav pane still points at the old place.*
+- 需要批量把浏览器、微信、QQ、网盘的下载目录改到新路径。*Bulk-redirect app download paths.*
 
-## 关键认知 / Key gotchas（务必理解，避免踩坑）
+**不要用 / Do NOT use when**：目标是可移动盘 / 网络盘 / UNC 路径；只想改某个软件自己的下载目录（应改软件设置）；当前下载目录正被备份或同步工具占用（先暂停）。
 
-1. **“整块盘 = 下载目录”陷阱 / Whole-drive trap**
-   目标路径写成盘符根（如 `F:\`）而非子文件夹（`F:\Downloads`）时，Windows 会把整块盘
-   登记成下载已知文件夹。目标**必须是子文件夹**。
-   *If the destination is a bare drive root (`F:\`) instead of a sub-folder
-   (`F:\Downloads`), Windows registers the whole disk as Downloads. The destination
-   MUST be a sub-folder — the script rejects bare roots.*
+---
 
-2. **隐藏的第二个注册表项 `Local Downloads` / The hidden second registry key**
-   导航栏/“此电脑”里的“下载”实际读取的是 GUID `{7D83EE9B-2244-4E70-B1F5-5393042AF1E4}`
-   （Local Downloads），而非常见的 `{374DE290-123F-4565-9164-39C4925E467B}`
-   （Downloads）。只改一个，侧栏依旧指向老地方/整盘。**两项都要改。**
-   *The navigation-pane "Downloads" reads GUID `{7D83EE9B-...}` (Local Downloads),
-   NOT the usual `{374DE290-...}` (Downloads). Fixing only one leaves the pane
-   pointing at the old place / whole disk. Both MUST be set.*
+## 能力边界与前置条件 / Scope & limits
 
-3. **中文名与图标 / Localized name & icon**
-   磁盘上的文件夹名是英文 `Downloads`，需靠目标文件夹内的 `desktop.ini`
-   （`CLSID2` + `LocalizedResourceName` + `IconResource`）让资源管理器显示为系统
-   “下载”并带正确图标。
-   *The on-disk name is English `Downloads`. A `desktop.ini` with `CLSID2` +
-   `LocalizedResourceName` + `IconResource` makes Explorer show the system name
-   "下载" with the correct icon.*
+| 项 / Item | 支持 / Supported | 不支持 / Not supported |
+|---|---|---|
+| 系统 / OS | Windows 10 / 11 | Windows 7/8、无 Explorer 的 Server Core |
+| Shell | Windows PowerShell 5.1+ | PowerShell 7 未做完整验证 |
+| 目标卷 / Target volume | **固定本地磁盘**（DriveType=3），如 `D:\Downloads` | 盘符根 `D:\`、U 盘/移动硬盘、网络映射盘、光驱、UNC `\\server\share` |
+| 目标位置 / Target path | 独立子文件夹 | `%USERPROFILE%`、`%WINDIR%`、`Program Files` 等保护目录、当前下载目录的子目录 |
+| 权限 / Rights | 普通用户即可（只写 HKCU） | 无需管理员；但**不能跨用户**修改 |
+| 显示名 / Name | 跟随系统 UI 语言（简中「下载」/ 英文 `Downloads`） | 不强制改成任意自定义中文名（可用 `-LocalizedResource` 覆盖资源串） |
+| 软件 / Apps | Chromium 系、Firefox、微信、QQ/TIM、百度/夸克/阿里云盘（尽力而为） | 迅雷、Telegram、Steam、游戏启动器、按账号加密存储的客户端（给出手动入口） |
 
-详见 / See `references/registry-reference.md` 与 / and `references/app-paths.md`.
+**迁移出错的后果 / Consequences of a failed migration**（务必先看）：
+
+- 注册表是**先备份、后写入**，且三处值写后逐一读回校验；备份失败（exit 3）时不会动任何注册表。
+  *Registry is backed up first; a backup failure aborts before any write.*
+- 文件是**物理移动**（`robocopy /MOVE`），不是复制。任何未通过校验的文件会明确列出并以 exit 4 退出，原文件尽可能保留在源目录。
+  *Files are physically MOVED, not copied. Unverified files are listed and the run exits 4.*
+- 回退**只恢复指向，不会把文件搬回**；需要手动拷回。
+  *Rollback restores the pointer only - it never moves files back.*
+- 重启 Explorer 会短暂关闭任务栏/桌面窗口；远程无人值守场景请加 `-NoExplorerRestart`。
+  *Explorer restart briefly closes the taskbar; add `-NoExplorerRestart` for remote sessions.*
+- 目标在系统盘时不会释放空间（只给 WARN）；空间不足、同名冲突、不可写会在预检阶段拦截。
+  *Insufficient space, name collisions and unwritable targets are caught before any change.*
+
+---
+
+## 关键认知 / Key gotchas
+
+1. **整盘陷阱 / Whole-drive trap** — 目标必须是子文件夹。写 `F:\` 会让整块盘成为下载目录，磁盘清理/同步工具可能误处理整盘。脚本直接拒绝。
+2. **两个 GUID / Two GUIDs** — 导航栏读的是 `{7D83EE9B-2244-4E70-B1F5-5393042AF1E4}`（Local Downloads），多数 API 读 `{374DE290-123F-4565-9164-39C4925E467B}`（Downloads）。**三处值都要写并校验**。
+3. **中文名与图标 / Name & icon** — 磁盘上是英文 `Downloads`，靠 `desktop.ini`（`CLSID2` + `LocalizedResourceName` + `IconResource`）显示系统名；文件夹需加只读属性。
+
+详见 `references/registry-reference.md`、`references/app-paths.md`；高频问题见 `references/FAQ.md`。
+*See the two references and the FAQ for details.*
+
+---
 
 ## 操作流程 / Workflow
 
-### 第 1 步 / Step 1：迁移系统下载目录（核心 / core）
+> 所有命令从 skill 根目录执行；先跑自检，再预览，最后执行。
+> *Run from the skill root: selftest, then preview, then apply.*
 
-运行 / Run `scripts/relocate_downloads.ps1`，目标必须是一个**子文件夹 / sub-folder**：
+**Step 0 — 自检 / self-test**（发版或首次使用前，无副作用）
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/selftest.ps1
+```
+全部 PASS 才继续。*All checks must PASS.*
 
+**Step 1 — 只读预览 / preview**（严格零写入）
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/relocate_downloads.ps1 -TargetPath "F:\Downloads" -DryRun
+```
+输出预检报告（源文件数/大小、可用空间、冲突、运行中的程序）与完整执行计划。**不写任何文件、备份或注册表。**
+
+**Step 2 — 执行迁移 / apply**
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/relocate_downloads.ps1 -TargetPath "F:\Downloads"
 ```
+依次：`reg.exe export` 备份两个键 + 写 manifest → 建目录 → 逐文件迁移+校验+重试 → 三处注册表写入并读回 → `desktop.ini` → 刷新 Explorer → 最终校验 → SUMMARY。
 
-- 脚本会**拒绝**裸盘符根（如 `F:\`），并报错说明原因；
-  *Rejects bare drive roots (e.g. `F:\`) with an explanatory error.*
-- 自动备份 `User Shell Folders` 与 `Shell Folders` 到 `.reg`；
-  *Backs up the relevant registry trees to `.reg`.*
-- 创建目标文件夹，迁移旧下载文件（`robocopy /MOVE` + `Move-Item` 兜底）；
-  *Creates the target and migrates existing files (`robocopy /MOVE` + `Move-Item`).*
-- 同时设置 Downloads GUID、命名值、Local Downloads GUID 三项（优先 `SHSetKnownFolderPath`
-  API，不可用时回退注册表直写）；
-  *Sets all three entries (Downloads GUID, named value, Local Downloads GUID),
-  preferring `SHSetKnownFolderPath`, falling back to direct registry writes.*
-- 写入 `desktop.ini` 保证中文名与图标；
-  *Writes `desktop.ini` for the localized name and icon.*
-- 重启资源管理器并校验。
-  *Restarts Explorer and verifies.*
-
-预览模式（只报告不执行）/ Preview (report only): 加 / add `-WhatIf`。
-不迁移文件 / Skip file migration: 加 / add `-MoveExisting:$false`。
-
-### 第 2 步 / Step 2：同步应用软件下载路径 / sync app download paths
-
+**Step 3 — 同步软件路径 / sync apps**（先关闭浏览器、微信、QQ、各网盘）
 ```powershell
+powershell -ExecutionPolicy Bypass -File scripts/set_app_downloads.ps1 -TargetPath "F:\Downloads" -DryRun
 powershell -ExecutionPolicy Bypass -File scripts/set_app_downloads.ps1 -TargetPath "F:\Downloads"
 ```
+检测到应用正在运行会**跳过并给 WARN**，避免配置被退出时覆盖；SUMMARY 分三栏列出 `Auto-updated` / `Manual change required` / `Failures`。
 
-自动处理 / Auto-handled:
-- Chromium 系（Chrome/Edge/Brave/Opera/Vivaldi，改 `Preferences` JSON）；
-- Firefox（改 `prefs.js`）；
-- 微信（改注册表 `FilePath`）；
-- 百度网盘、夸克网盘、阿里云盘（扫描 JSON 配置中的下载路径键并替换）；
-- QQ / TIM（注册表尽力改，失败给出手动指引）。
+**Step 4 — 验证 / verify**
+- SUMMARY 中 `Failures: 0`、`Result: SUCCESS`；
+- 资源管理器打开「下载」，地址为 `F:\Downloads`，显示为「下载」且带下载图标；
+- 浏览器下载一个测试文件，确认落到新目录；
+- 侧栏仍是旧位置时，取消固定再重新固定，或注销/重启一次。
 
-Best-effort auto + manual fallback:
-- Baidu Netdisk / Quark Netdisk / Aliyun Drive (scan JSON config for download-path keys);
-- QQ / TIM (registry best-effort, manual fallback).
+---
 
-其余软件（迅雷、Telegram、Steam、音乐/游戏启动器等）给出手动修改指引。每个被改文件都会先备份为 `.bak`。
-*Remaining apps (Thunder, Telegram, Steam, music/game launchers) get manual
-instructions. Every edited file is backed up to `.bak` first.*
+## 多场景示例 / Usage examples
 
-> 若某浏览器 `Preferences` 里**没有** `download.default_directory`，说明它正使用系统
-> “下载”文件夹——此时无需改，因为第 1 步已迁移好系统目录。
-> *If a browser has no `download.default_directory`, it already uses the system
-> Downloads folder (already relocated in Step 1) — nothing to change.*
-
-### 第 3 步 / Step 3：验证 / verify
-
-- 资源管理器地址栏打开“下载”，应显示 `F:\Downloads`（实际路径）且文件夹名为“下载”、带下载图标；
-  *Open Downloads in Explorer: path resolves to `F:\Downloads`, folder shows as
-  "下载" with the download icon.*
-- 在浏览器随便下个文件，确认落盘到新目录；
-  *Download a test file to confirm it lands in the new folder.*
-- 若侧栏“下载”仍显示旧位置，取消固定到快速访问再重新固定，或重启一次。
-  *If the nav-pane "Downloads" still shows the old place, unpin/pin it again or reboot.*
-
-## 使用示例 / Usage example
-
-下面是一段真实可复现的对话式用法（假设把下载迁到 `F:\Downloads`）：
-
+**场景 A：标准迁移（C 盘 → F 盘，搬家 + 同步软件）**
 ```powershell
-# 1) 迁移系统「下载」到 F:\Downloads（拒绝裸盘符根，自动备份+迁移文件+修中文名/图标）
+powershell -ExecutionPolicy Bypass -File scripts/relocate_downloads.ps1 -TargetPath "F:\Downloads" -DryRun
 powershell -ExecutionPolicy Bypass -File scripts/relocate_downloads.ps1 -TargetPath "F:\Downloads"
-
-# 期望输出（节选）：
-#   [OK] 拒绝裸盘符根检查通过: F:\Downloads
-#   [OK] 已备份注册表 -> C:\Users\Administrator\Downloads_Backup_*.reg
-#   [OK] 已创建目标文件夹: F:\Downloads
-#   [OK] 已迁移旧下载文件 N 个
-#   [OK] SHSetKnownFolderPath(Downloads) = 0x00000000
-#   [OK] 已设置 Local Downloads GUID -> F:\Downloads
-#   [OK] 已写入 desktop.ini（中文名=下载, 图标）
-#   [OK] 已重启资源管理器
-
-# 2) 同步浏览器 / 微信 / 网盘 / QQ 的下载路径
-powershell -ExecutionPolicy Bypass -File scripts/set_app_downloads.ps1 -TargetPath "F:\Downloads"
-
-# 期望输出（节选）：
-#   == Chromium browsers ==
-#     [ok]   C:\Users\...\Chrome\User Data\Default\Preferences
-#   == Mozilla Firefox ==
-#     [ok]   C:\Users\...\Mozilla\Firefox\Profiles\xxxx\prefs.js
-#   == WeChat (微信) ==
-#     [ok]   set HKCU\Software\Tencent\WeChat\FilePath = F:\Downloads
-#   == Baidu Netdisk (百度网盘) ==
-#     [ok]   C:\Users\...\Baidu\BaiduNetdisk\gui-config.json
-#   == Quark Netdisk (夸克网盘) ==
-#     (no config files found under expected locations)   # 未装则跳过
-#   == Aliyun Drive (阿里云盘) ==
-#     [ok]   C:\Users\...\AliyunDrive\config.json
-#   == QQ / TIM ==
-#     (QQ stores the receive folder per-account; registry key not matched)
+# 期望输出结尾：
+#   [OK]     Verified 220/220 file(s) present with matching sizes.
+#   [OK]     VERIFY Downloads (GUID) = F:\Downloads
+#   [OK]     VERIFY Local Downloads (GUID) = F:\Downloads
 #   ===== SUMMARY =====
-#   Auto-updated (...):  ...
-#   Manual change required: Thunder / Telegram / Steam ...
+#   Files        : checked=220, failed=0
+#   Failures     : 0
+#   Result       : SUCCESS
+powershell -ExecutionPolicy Bypass -File scripts/set_app_downloads.ps1 -TargetPath "F:\Downloads"
 ```
 
-> 提示：修改网盘/QQ 配置前请先**关闭对应软件**，改完再重启生效。
-> *Tip: close each app before its config is edited, then restart it to apply.*
+**场景 B：修复「整块 F 盘 = 下载」的事故，且不搬文件**
+```powershell
+# 当前 Downloads 已是 F:\（盘符根）。先预览，再只修指向、保留现有文件位置
+powershell -ExecutionPolicy Bypass -File scripts/relocate_downloads.ps1 -TargetPath "F:\Downloads" -DryRun
+powershell -ExecutionPolicy Bypass -File scripts/relocate_downloads.ps1 -TargetPath "F:\Downloads" -NoMoveExisting
+# -NoMoveExisting 是 [switch]，在 powershell -File 命令行下可靠；v1.0.0 的 -MoveExisting:$false 在该模式下会报参数转换错误
+```
+> 注意：`-NoMoveExisting` 时旧文件仍留在原地，需要自行整理；目录指向已经是新的 `F:\Downloads`。
 
-## 示意图 / Screenshot（before → after）
+**场景 C：目标目录已有同名文件 + 无人值守**
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/relocate_downloads.ps1 `
+  -TargetPath "D:\我的下载" -AllowExistingFiles -NoExplorerRestart `
+  -BackupDir "D:\backup\downloads"
+# 结束后手动注销/重启以刷新 Explorer；备份与 manifest 落在 -BackupDir
+```
 
-下图（亦存于 `assets/example-before-after.svg`）展示「迁移前 / Before」与「迁移后 / After」的
-路径与形态变化：
+**场景 D：回退 / rollback**
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/restore_downloads.ps1 -BackupDir "$env:USERPROFILE" -DryRun
+powershell -ExecutionPolicy Bypass -File scripts/restore_downloads.ps1 -BackupDir "$env:USERPROFILE"
+# 只恢复指向，不搬回文件
+```
 
-- **迁移前 / Before**：下载位于系统盘 `C:\Users\<用户>\Downloads`，占用 C 盘空间。
-- **迁移后 / After**：下载变为其他盘上的专用子文件夹 `F:\下载`，显示系统“下载”名与图标，
-  旧文件已迁移，C 盘空间得以释放。
+> 更多高频问题（退出码、中文名、OneDrive 冲突、软件改不动等）见 `references/FAQ.md`。
 
-*The bundled `assets/example-before-after.svg` shows the path change: from
-`C:\Users\<user>\Downloads` (on the system C: drive) before, to a dedicated
-`F:\下载` folder (with the system name and icon) on another drive after.*
+---
 
-## 安全与回退 / Safety & rollback
+## 退出码 / Exit codes
 
-- 所有注册表/配置修改前均有备份（`.reg` / `.bak`）；
-  *Every registry/config change is backed up first (`.reg` / `.bak`).*
-- 回退：双击导入对应的 `.reg` 备份即可恢复指向；文件迁移是物理移动，回退只恢复“指向”
-  不会自动搬回，请提前确认；
-  *Rollback: double-click the matching `.reg` backup to restore the pointer. File
-  migration is physical — rolling back only restores the pointer, not the files.*
-- 脚本均为幂等友好的：目标已是当前路径时会安全跳过相关步骤。
-  *Scripts are idempotent-friendly: steps are safely skipped when already correct.*
+| 脚本 | 0 | 2 | 3 | 4 | 5 | 1 |
+|---|---|---|---|---|---|---|
+| `relocate_downloads.ps1` | 成功 | 预检失败 | 备份失败 | 文件迁移有失败 | 最终校验失败 | 未预期异常 |
+| `set_app_downloads.ps1` | 成功 | 目标非法 | — | 部分修改失败 | — | 未预期异常 |
+| `restore_downloads.ps1` | 成功 | 无 manifest | — | — | 部分写入失败 | 未预期异常 |
+
+非零退出码**一定**伴随 SUMMARY 里明确的 `Failures` 列表。手动修改项不算失败。
+
+---
 
 ## 资源 / Resources
 
-- `scripts/relocate_downloads.ps1` —— 核心迁移（指向修复 + 文件迁移 + 中文名/图标 + 校验）
-  *Core relocation (pointer fix + file migration + localized name/icon + verify).*
-- `scripts/set_app_downloads.ps1` —— 应用软件下载路径同步（浏览器/微信/网盘/QQ）
-  *App download-path sync (browsers/WeChat/netdisks/QQ).*
-- `references/registry-reference.md` —— 注册表项、GUID、陷阱与回退详解
-  *Registry keys, GUIDs, traps and rollback.*
-- `references/app-paths.md` —— 各软件下载目录位置与手动修改指引
-  *Per-app download locations and manual steps.*
-- `assets/desktop.ini.template` —— 可直接复制到新文件夹的 desktop.ini 模板
-  *Ready-to-copy `desktop.ini` template.*
-- `assets/example-before-after.svg` —— 修复前后对比示意图
-  *Before/after comparison diagram.*
+| 路径 | 用途 |
+|---|---|
+| `scripts/relocate_downloads.ps1` | 核心：预检 + 备份 + 迁移校验 + 双 GUID + desktop.ini + 最终校验 |
+| `scripts/set_app_downloads.ps1` | 软件下载路径同步（含只读预览与失败汇总） |
+| `scripts/restore_downloads.ps1` | 按 manifest 回退注册表指向 |
+| `scripts/selftest.ps1` | 自动回归测试（打包/编码/语法/单测/DryRun 零写入） |
+| `scripts/lib/DownloadsCommon.ps1` | 可单测的纯校验与快照函数（点源加载） |
+| `references/registry-reference.md` | 注册表项、GUID、备份格式、验证清单 |
+| `references/app-paths.md` | 软件配置位置、兼容矩阵、手动入口 |
+| `references/FAQ.md` | 高频问题集中答复 |
+| `assets/desktop.ini.template` | 可直接复制的 desktop.ini 模板 |
+| `assets/example-before-after.svg` | 迁移前 / 后路径对比示意图 |
+| `assets/icon.png` | Skill 图标 |
 
+## 示意图 / Diagram
+
+`assets/example-before-after.svg` 展示中性迁移叙事：`C:\Users\<用户>\Downloads` → 其他盘上的专用子文件夹（系统名与图标、旧文件已迁移）。图中**不描绘整盘事故**。
+*The bundled SVG shows a plain C-drive → other-drive migration, not the whole-drive failure.*
