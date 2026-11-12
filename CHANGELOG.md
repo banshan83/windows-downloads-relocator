@@ -9,6 +9,8 @@
 
 ### Fixed（关键缺陷 / critical）
 
+- **SkillHub 分发包文件类型不兼容**：平台拒绝隐藏文件（`.gitignore`）、无扩展名文件（`LICENSE`）与非常规后缀（`desktop.ini.template`）。现固定产出两份包：`windows-downloads-relocator.zip`（GitHub / 通用）与 `windows-downloads-relocator-skillhub.zip`（仅含平台接受的 `.md` / `.ps1` / `.png` / `.svg`）。`desktop.ini` 改由主脚本内嵌生成，模板文件移除、内容并入 `references/registry-reference.md`；MIT 许可信息写入 README，避免包内出现断链。
+  *SkillHub rejects dotfiles, extension-less LICENSE and .template files; a dedicated SkillHub zip is now produced alongside the full one.*
 - **分发包被 SkillHub 拒收**：包内含 `.gitignore`，而 SkillHub 不允许上传隐藏文件。打包流程现统一排除所有以 `.` 开头的文件 / 目录；`.gitignore` 仅保留在 GitHub 仓库。`selftest.ps1` 新增 `-DistributionMode`，便于从分发包内运行自检。
   *SkillHub rejects dotfiles; the distribution zip now excludes `.gitignore` and all hidden entries.*
 - **脚本无法启动**：`relocate_downloads.ps1` 同时使用 `CmdletBinding(SupportsShouldProcess=$true)` 和自定义 `[switch]$WhatIf`，PowerShell 5.1 报「对命令多次定义了名为 WhatIf 的参数」，**任何调用都失败**。改为 `[CmdletBinding()]` + 自定义 `-WhatIf`（别名 `-DryRun`）。
@@ -51,6 +53,6 @@
 - 核心迁移脚本 `scripts/relocate_downloads.ps1`：防整盘陷阱、修复隐藏的 `Local Downloads` 注册表项、写入 `desktop.ini` 恢复中文名与图标、`robocopy /MOVE` + `Move-Item` 迁移文件、执行前导出 `.reg` 备份。
 - 应用软件下载路径同步脚本 `scripts/set_app_downloads.ps1`：Chromium/Edge、Firefox、微信、QQ、百度网盘、夸克网盘、阿里云盘（含手动指引兜底）。
 - 参考文档 `references/registry-reference.md`、`references/app-paths.md`。
-- 矢量示意图 `assets/example-before-after.svg` 与 `desktop.ini` 模板 `assets/desktop.ini.template`。
+- 矢量示意图 `assets/example-before-after.svg`；`desktop.ini` 由主脚本内嵌生成（不附带独立模板文件）。
 - 中英双语 `SKILL.md` 与 `README.md`，MIT 许可证。
 - 版本号机制（`CHANGELOG.md` + SemVer），便于后续维护与发版。

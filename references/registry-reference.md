@@ -51,7 +51,14 @@ IconResource=%SystemRoot%\system32\imageres.dll,-184
 - `desktop.ini` 需设为 **隐藏 + 系统** 属性，所在文件夹需加 **只读** 属性（Explorer 读取 desktop.ini 的开关，属正常现象）；
 - v1.1.0 写入后调用 `SHChangeNotify(SHCNE_ASSOCCHANGED)` 通知 shell 刷新，减少必须重启 Explorer 的情况。
 
-需要自定义名称可传 `-LocalizedResource`（例如指向自定义 DLL 资源或直接写死文本）。模板见 `assets/desktop.ini.template`。
+需要自定义名称可传 `-LocalizedResource`（例如指向自定义 DLL 资源或直接写死文本）。v1.1.0 起 `desktop.ini` 由 `scripts/relocate_downloads.ps1` **内嵌生成**，不依赖任何外部模板文件（SkillHub 不接受 `.template` 后缀，因此不再随包分发）。完整内容如下，供手工排查时参考：
+
+```ini
+[.ShellClassInfo]
+CLSID2={374DE290-123F-4565-9164-39C4925E467B}
+LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21798
+IconResource=%SystemRoot%\system32\imageres.dll,-184
+```
 
 ## 4. 备份与 manifest（v1.1.0）
 

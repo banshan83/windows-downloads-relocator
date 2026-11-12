@@ -168,10 +168,9 @@ powershell -ExecutionPolicy Bypass -File scripts/restore_downloads.ps1 -BackupDi
 | `scripts/restore_downloads.ps1` | 按 manifest 回退注册表指向 |
 | `scripts/selftest.ps1` | 自动回归测试（打包/编码/语法/单测/DryRun 零写入） |
 | `scripts/lib/DownloadsCommon.ps1` | 可单测的纯校验与快照函数（点源加载） |
-| `references/registry-reference.md` | 注册表项、GUID、备份格式、验证清单 |
+| `references/registry-reference.md` | 注册表项、GUID、备份格式、验证清单，含 `desktop.ini` 完整内容 |
 | `references/app-paths.md` | 软件配置位置、兼容矩阵、手动入口 |
 | `references/FAQ.md` | 高频问题集中答复 |
-| `assets/desktop.ini.template` | 可直接复制的 desktop.ini 模板 |
 | `assets/example-before-after.svg` | 迁移前 / 后路径对比示意图 |
 | `assets/icon.png` | Skill 图标 |
 

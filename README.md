@@ -4,7 +4,7 @@
 >
 > Safely relocate the Windows **Downloads** known folder to a dedicated sub-folder on another drive. Pre-flight checks, per-file verified migration, full registry backups and honest pass/fail reporting. Fixes the hidden `Local Downloads` GUID, blocks the "whole drive = Downloads" mistake, keeps the localized name (下载) and icon via `desktop.ini`, and syncs common apps' default download directories (Chromium / Edge, Firefox, WeChat, QQ, Baidu / Quark / Ali Netdisk).
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/banshan83/windows-downloads-relocator/blob/main/LICENSE)
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6.svg)](https://github.com/banshan83/windows-downloads-relocator)
 [![PowerShell](https://img.shields.io/badge/powershell-5.1%2B-blue.svg)](https://github.com/banshan83/windows-downloads-relocator)
@@ -44,8 +44,15 @@
 发版步骤：跑 `scripts/selftest.ps1` 并确认全部 PASS → 更新 `SKILL.md` frontmatter `version`、本文件 badge 与版本号 → 在 `CHANGELOG.md` 追加条目 → `git tag vX.Y.Z` → GitHub Release（附 `dist/windows-downloads-relocator.zip`）。
 *Release checklist: selftest first, then bump all three version locations.*
 
-> **打包约定 / Packaging rule**：分发包必须排除所有以 `.` 开头的隐藏文件与目录。SkillHub 拒绝上传 `.gitignore` 一类隐藏文件，因此 `.gitignore` 只保留在 GitHub 仓库中，不随 SkillHub / Release 的 zip 分发。从分发包内运行自检请加 `-DistributionMode`（该模式跳过仓库专属文件的断言）。
-> *Dotfiles are excluded from every distribution zip; `.gitignore` stays in the GitHub repo only.*
+> **打包约定 / Packaging rule**：每次发版由 `publish_skill.py` 产出并校验**两个包**：
+>
+> | 包 | 用途 | 内容 |
+> |---|---|---|
+> | `windows-downloads-relocator.zip` | GitHub Release / 通用完整版 | 排除隐藏文件，保留 `LICENSE` |
+> | `windows-downloads-relocator-skillhub.zip` | **SkillHub 专用** | 仅保留 `.md` / `.ps1` / `.png` / `.svg` |
+>
+> SkillHub 已确认拒绝三类文件：隐藏文件（`.gitignore`）、无扩展名文件（`LICENSE`）、`.template` 后缀（`desktop.ini.template`）。因此 `.gitignore` 只留在 GitHub 仓库；`desktop.ini` 由 `scripts/relocate_downloads.ps1` 内嵌生成、内容并入 `references/registry-reference.md`；MIT 许可信息内嵌本页。从分发包内运行自检请加 `-DistributionMode`。
+> *SkillHub rejects dotfiles, extension-less files and .template files; a dedicated zip is produced for it.*
 
 ---
 
@@ -56,7 +63,7 @@ windows-downloads-relocator/
 ├── SKILL.md                          # WorkBuddy skill 定义（触发条件、流程、资源索引）
 ├── README.md                         # 本文件
 ├── CHANGELOG.md                      # 版本变更记录
-├── LICENSE                           # MIT 许可证
+├── LICENSE                           # MIT 许可证（仅源码仓库；SkillHub 包不含）
 ├── .gitignore                        # 仅 GitHub 仓库；不随分发包提供 (repo-only)
 ├── scripts/
 │   ├── relocate_downloads.ps1        # 核心：预检 + 备份 + 迁移校验 + 双 GUID + 名称/图标 + 校验
@@ -70,7 +77,6 @@ windows-downloads-relocator/
 │   ├── app-paths.md                  # 各软件下载目录位置、兼容矩阵与手动入口
 │   └── FAQ.md                        # 高频问题集中答复
 └── assets/
-    ├── desktop.ini.template          # 可直接复制的 desktop.ini 模板
     ├── example-before-after.svg      # 迁移前 / 后对比示意图
     └── icon.png                      # Skill 图标
 ```
@@ -194,7 +200,8 @@ powershell -ExecutionPolicy Bypass -File scripts/selftest.ps1
 
 ## 许可证 / License
 
-[MIT](LICENSE) © 2026 banshan83
+本项目采用 **MIT** 许可证，© 2026 banshan83。完整条款见 [LICENSE](https://github.com/banshan83/windows-downloads-relocator/blob/main/LICENSE)。SkillHub 分发包不含独立的 `LICENSE` 文件（平台不接受无扩展名文件），许可信息已内嵌于本页。
+*MIT licensed; the SkillHub package omits the standalone LICENSE file because the platform rejects extension-less files.*
 
 ---
 

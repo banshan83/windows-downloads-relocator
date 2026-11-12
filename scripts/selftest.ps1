@@ -71,12 +71,12 @@ Write-Output ''
 # ---------------------------------------------------------------- 1. files ---
 Write-Output '--- 1. Packaging ---'
 $required = @(
-    'SKILL.md', 'README.md', 'CHANGELOG.md', 'LICENSE',
+    'SKILL.md', 'README.md', 'CHANGELOG.md',
     'scripts\relocate_downloads.ps1', 'scripts\set_app_downloads.ps1',
     'scripts\restore_downloads.ps1', 'scripts\selftest.ps1',
     'scripts\lib\DownloadsCommon.ps1',
     'references\registry-reference.md', 'references\app-paths.md', 'references\FAQ.md',
-    'assets\desktop.ini.template', 'assets\example-before-after.svg', 'assets\icon.png'
+    'assets\example-before-after.svg', 'assets\icon.png'
 )
 # .gitignore is a repo-only dotfile. SkillHub rejects hidden files, so the
 # distribution zip never contains it. Only the source checkout must have it.
@@ -84,6 +84,13 @@ if (-not $DistributionMode) { $required += '.gitignore' }
 foreach ($r in $required) {
     Assert-True -Name "file exists: $r" -Condition (Test-Path -LiteralPath (Join-Path $SkillRoot $r))
 }
+# LICENSE and desktop.ini.template are deliberately absent from BOTH zips
+# (SkillHub rejects extension-less files and .template files). Assert the
+# information is embedded elsewhere, so no package ships a dead reference.
+$readmeRaw = Get-Content -LiteralPath (Join-Path $SkillRoot 'README.md') -Raw -Encoding UTF8
+$mainRaw   = Get-Content -LiteralPath (Join-Path $SkillRoot 'scripts\relocate_downloads.ps1') -Raw -Encoding UTF8
+Assert-True -Name 'MIT licence info embedded in README (LICENSE optional)' -Condition ($readmeRaw -match 'MIT' -and $readmeRaw -match 'banshan83')
+Assert-True -Name 'desktop.ini generated inline (no template dependency)' -Condition ($mainRaw -match 'LocalizedResourceName=' -and $mainRaw -match 'IconResource=')
 Write-Output ''
 
 # ------------------------------------------------------------- 2. encodings ---
@@ -155,8 +162,8 @@ foreach ($r in $refs) {
     $p = Join-Path $SkillRoot ($r -replace '/', '\')
     Assert-True -Name "documented path exists: $r" -Condition (Test-Path -LiteralPath $p)
 }
-$dit = Get-Content -LiteralPath (Join-Path $SkillRoot 'assets\desktop.ini.template') -Raw -Encoding UTF8
-Assert-True -Name 'desktop.ini template has CLSID2 + LocalizedResourceName + IconResource' -Condition ($dit -match 'CLSID2=' -and $dit -match 'LocalizedResourceName=' -and $dit -match 'IconResource=')
+$regRaw = Get-Content -LiteralPath (Join-Path $SkillRoot 'references\registry-reference.md') -Raw -Encoding UTF8
+Assert-True -Name 'desktop.ini spec has CLSID2 + LocalizedResourceName + IconResource' -Condition ($regRaw -match 'CLSID2=' -and $regRaw -match 'LocalizedResourceName=' -and $regRaw -match 'IconResource=' -and $mainRaw -match '\.ShellClassInfo')
 Write-Output ''
 
 # ------------------------------------------------------------- 7. helpers -----
