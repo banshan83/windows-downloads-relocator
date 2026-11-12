@@ -9,6 +9,8 @@
 
 ### Fixed（关键缺陷 / critical）
 
+- **分发包被 SkillHub 拒收**：包内含 `.gitignore`，而 SkillHub 不允许上传隐藏文件。打包流程现统一排除所有以 `.` 开头的文件 / 目录；`.gitignore` 仅保留在 GitHub 仓库。`selftest.ps1` 新增 `-DistributionMode`，便于从分发包内运行自检。
+  *SkillHub rejects dotfiles; the distribution zip now excludes `.gitignore` and all hidden entries.*
 - **脚本无法启动**：`relocate_downloads.ps1` 同时使用 `CmdletBinding(SupportsShouldProcess=$true)` 和自定义 `[switch]$WhatIf`，PowerShell 5.1 报「对命令多次定义了名为 WhatIf 的参数」，**任何调用都失败**。改为 `[CmdletBinding()]` + 自定义 `-WhatIf`（别名 `-DryRun`）。
   *v1.0.0 failed on EVERY invocation due to a WhatIf parameter collision.*
 - **预览模式仍写文件**：`-WhatIf` 之前就执行了 `.reg` 备份导出。重写为严格只读的 DryRun，由 `selftest.ps1` 断言零写入。

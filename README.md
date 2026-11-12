@@ -44,6 +44,9 @@
 发版步骤：跑 `scripts/selftest.ps1` 并确认全部 PASS → 更新 `SKILL.md` frontmatter `version`、本文件 badge 与版本号 → 在 `CHANGELOG.md` 追加条目 → `git tag vX.Y.Z` → GitHub Release（附 `dist/windows-downloads-relocator.zip`）。
 *Release checklist: selftest first, then bump all three version locations.*
 
+> **打包约定 / Packaging rule**：分发包必须排除所有以 `.` 开头的隐藏文件与目录。SkillHub 拒绝上传 `.gitignore` 一类隐藏文件，因此 `.gitignore` 只保留在 GitHub 仓库中，不随 SkillHub / Release 的 zip 分发。从分发包内运行自检请加 `-DistributionMode`（该模式跳过仓库专属文件的断言）。
+> *Dotfiles are excluded from every distribution zip; `.gitignore` stays in the GitHub repo only.*
+
 ---
 
 ## 目录结构 / Structure
@@ -54,7 +57,7 @@ windows-downloads-relocator/
 ├── README.md                         # 本文件
 ├── CHANGELOG.md                      # 版本变更记录
 ├── LICENSE                           # MIT 许可证
-├── .gitignore
+├── .gitignore                        # 仅 GitHub 仓库；不随分发包提供 (repo-only)
 ├── scripts/
 │   ├── relocate_downloads.ps1        # 核心：预检 + 备份 + 迁移校验 + 双 GUID + 名称/图标 + 校验
 │   ├── set_app_downloads.ps1         # 同步浏览器 / 网盘 / IM 的下载路径
@@ -97,6 +100,8 @@ git clone https://github.com/banshan83/windows-downloads-relocator.git ~/.workbu
 ```powershell
 # 0) 首次使用 / 发版前：自动自检（无副作用）
 powershell -ExecutionPolicy Bypass -File scripts/selftest.ps1
+#    若从 SkillHub 下载的分发包内运行（无 .gitignore），加 -DistributionMode
+powershell -ExecutionPolicy Bypass -File scripts/selftest.ps1 -DistributionMode
 
 # 1) 只读预览：看预检报告与执行计划，不写任何东西
 powershell -ExecutionPolicy Bypass -File scripts/relocate_downloads.ps1 -TargetPath "D:\Downloads" -DryRun

@@ -18,8 +18,17 @@
     Also dry-run set_app_downloads.ps1 (slower: scans %LOCALAPPDATA% for browser
     profiles). Off by default.
 
+.PARAMETER DistributionMode
+    Use when running from a distribution zip (e.g. downloaded from SkillHub).
+    The zip deliberately excludes repo-only dotfiles such as .gitignore, so
+    that assertion is skipped. Default mode (source checkout / git clone)
+    still checks all 68 assertions.
+
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File scripts/selftest.ps1
+
+.EXAMPLE
+    powershell -ExecutionPolicy Bypass -File scripts/selftest.ps1 -DistributionMode
 
 .EXIT CODES
     0  all tests passed
@@ -31,7 +40,8 @@
 [CmdletBinding()]
 param(
     [string]$SkillRoot,
-    [switch]$IncludeAppScript
+    [switch]$IncludeAppScript,
+    [switch]$DistributionMode
 )
 
 $ErrorActionPreference = 'Continue'
@@ -61,13 +71,16 @@ Write-Output ''
 # ---------------------------------------------------------------- 1. files ---
 Write-Output '--- 1. Packaging ---'
 $required = @(
-    'SKILL.md', 'README.md', 'CHANGELOG.md', 'LICENSE', '.gitignore',
+    'SKILL.md', 'README.md', 'CHANGELOG.md', 'LICENSE',
     'scripts\relocate_downloads.ps1', 'scripts\set_app_downloads.ps1',
     'scripts\restore_downloads.ps1', 'scripts\selftest.ps1',
     'scripts\lib\DownloadsCommon.ps1',
     'references\registry-reference.md', 'references\app-paths.md', 'references\FAQ.md',
     'assets\desktop.ini.template', 'assets\example-before-after.svg', 'assets\icon.png'
 )
+# .gitignore is a repo-only dotfile. SkillHub rejects hidden files, so the
+# distribution zip never contains it. Only the source checkout must have it.
+if (-not $DistributionMode) { $required += '.gitignore' }
 foreach ($r in $required) {
     Assert-True -Name "file exists: $r" -Condition (Test-Path -LiteralPath (Join-Path $SkillRoot $r))
 }
