@@ -2,12 +2,12 @@
 
 本项目版本号遵循 [语义化版本 2.0.0](https://semver.org/lang/zh-CN/)（SemVer）：`主版本.次版本.修订号`。
 
-## [1.1.0] - 2026-11-12
+## [1.1.1] - 2026-11-12
 
-依据 SkillHub TRACE 评测报告（综合 4.5/5，R 可靠性 4.0、E 有效性 4.3）做的可靠性重构与文档升级。
-*Reliability and documentation overhaul driven by the SkillHub TRACE evaluation.*
+针对 SkillHub 上传规则做的**分发包兼容性修订**，并统一版本号。**功能代码零改动**，v1.1.0 的全部能力不变。
+*Packaging-only release for SkillHub's upload rules, plus a version bump. No functional changes; all v1.1.0 capabilities are unchanged.*
 
-### Fixed（关键缺陷 / critical）
+### Fixed
 
 - **SkillHub 禁止二进制文件**：平台提示「不支持的文件类型: icon.png（禁止上传二进制文件）」。此前 SkillHub 包里仍带 864,490 B 的 PNG 图标（占整包 94%），被拒收后平台只统计已接受的文本，于是 892 KB 的包显示成 **133 KB**（剩余文本解压后恰为 136,755 B ≈ 133.5 KiB）。现 SkillHub 包收紧为**仅 `.md` / `.ps1` 纯文本**，打包器新增二进制内容检测（NUL 字节 / 常见魔数 / UTF-8 可解码性），不再只看扩展名；示意图转为 `references/diagram.md` 中的完整 SVG 源码，图标与渲染图只留在仓库 / 通用完整包，文档改用绝对 URL 引用以免出现包内悬空引用。
   *SkillHub rejects binary uploads; its zip is now strictly text-only with content-level binary detection at build time.*
@@ -15,6 +15,19 @@
   *SkillHub rejects dotfiles, extension-less LICENSE and .template files; a dedicated SkillHub zip is now produced alongside the full one.*
 - **分发包被 SkillHub 拒收**：包内含 `.gitignore`，而 SkillHub 不允许上传隐藏文件。打包流程现统一排除所有以 `.` 开头的文件 / 目录；`.gitignore` 仅保留在 GitHub 仓库。`selftest.ps1` 新增 `-DistributionMode`，便于从分发包内运行自检。
   *SkillHub rejects dotfiles; the distribution zip now excludes `.gitignore` and all hidden entries.*
+
+### Changed
+
+- 版本号统一为 `1.1.1`（SKILL.md frontmatter / README badge / 四个脚本的输出与作者标识 / 备份 manifest `Version` 字段 / references 适用版本 / CHANGELOG）。历史描述中的「v1.1.0 起…」「在 v1.1.0 修复」按事实保留。
+- `selftest.ps1` 扫描文档路径前剥离绝对 URL，并新增断言禁止 SKILL.md / README 出现相对 `assets/` 路径，保证纯文本包无悬空引用。
+
+## [1.1.0] - 2026-11-12
+
+依据 SkillHub TRACE 评测报告（综合 4.5/5，R 可靠性 4.0、E 有效性 4.3）做的可靠性重构与文档升级。
+*Reliability and documentation overhaul driven by the SkillHub TRACE evaluation.*
+
+### Fixed（关键缺陷 / critical）
+
 - **脚本无法启动**：`relocate_downloads.ps1` 同时使用 `CmdletBinding(SupportsShouldProcess=$true)` 和自定义 `[switch]$WhatIf`，PowerShell 5.1 报「对命令多次定义了名为 WhatIf 的参数」，**任何调用都失败**。改为 `[CmdletBinding()]` + 自定义 `-WhatIf`（别名 `-DryRun`）。
   *v1.0.0 failed on EVERY invocation due to a WhatIf parameter collision.*
 - **预览模式仍写文件**：`-WhatIf` 之前就执行了 `.reg` 备份导出。重写为严格只读的 DryRun，由 `selftest.ps1` 断言零写入。

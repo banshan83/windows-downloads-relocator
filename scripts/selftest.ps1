@@ -35,7 +35,7 @@
     1  one or more tests failed
 
 .NOTES
-    Windows PowerShell 5.1+. Author: banshan83 | v1.1.0
+    Windows PowerShell 5.1+. Author: banshan83 | v1.1.1
 #>
 [CmdletBinding()]
 param(

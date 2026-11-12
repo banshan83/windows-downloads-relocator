@@ -49,7 +49,7 @@
 
 .NOTES
     Windows PowerShell 5.1+. No administrator rights required.
-    Author: banshan83 | v1.1.0
+    Author: banshan83 | v1.1.1
 #>
 [CmdletBinding()]
 param(
@@ -210,7 +210,7 @@ function Set-DlrAppJsonConfig {
 
 # ============================================================================
 try {
-    Write-Output '===== App Download Path Sync v1.1.0 ====='
+    Write-Output '===== App Download Path Sync v1.1.1 ====='
     Write-DlrLog INFO ("Mode: " + $(if ($WhatIf) { 'DRY RUN (writes nothing)' } else { 'APPLY' }))
 
     # ---- validate target (same rules as the core script) ----

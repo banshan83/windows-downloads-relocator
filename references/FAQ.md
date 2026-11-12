@@ -48,8 +48,8 @@ v1.0.0 有个 PowerShell 作用域 bug（函数内 `$changed +=` 不写回父作
 *Running apps are detected and skipped by default; close them and re-run.*
 
 **Q10. 报错"对命令多次定义了名为 WhatIf 的参数"？**
-这是 **v1.0.0 的已知致命 bug**：`CmdletBinding(SupportsShouldProcess=$true)` 与自定义 `-WhatIf` 参数冲突，导致**任何调用都失败**。升级到 v1.1.0 即可。`selftest.ps1` 有回归断言防止复发。
-*A v1.0.0 bug made EVERY invocation fail. Upgrade to v1.1.0.*
+这是 **v1.0.0 的已知致命 bug**：`CmdletBinding(SupportsShouldProcess=$true)` 与自定义 `-WhatIf` 参数冲突，导致**任何调用都失败**。升级到 v1.1.1 即可。`selftest.ps1` 有回归断言防止复发。
+*A v1.0.0 bug made EVERY invocation fail. Upgrade to v1.1.1.*
 
 **Q11. 目标文件夹里已经有同名文件？**
 默认判为 ERROR 并中止（避免 robocopy 静默覆盖）。确认可覆盖后加 `-AllowExistingFiles`。

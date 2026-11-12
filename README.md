@@ -5,7 +5,7 @@
 > Safely relocate the Windows **Downloads** known folder to a dedicated sub-folder on another drive. Pre-flight checks, per-file verified migration, full registry backups and honest pass/fail reporting. Fixes the hidden `Local Downloads` GUID, blocks the "whole drive = Downloads" mistake, keeps the localized name (下载) and icon via `desktop.ini`, and syncs common apps' default download directories (Chromium / Edge, Firefox, WeChat, QQ, Baidu / Quark / Ali Netdisk).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/banshan83/windows-downloads-relocator/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6.svg)](https://github.com/banshan83/windows-downloads-relocator)
 [![PowerShell](https://img.shields.io/badge/powershell-5.1%2B-blue.svg)](https://github.com/banshan83/windows-downloads-relocator)
 
@@ -33,7 +33,7 @@
 
 ## 版本 / Version
 
-当前版本：**v1.1.0**（变更记录见 [`CHANGELOG.md`](CHANGELOG.md)）。
+当前版本：**v1.1.1**（变更记录见 [`CHANGELOG.md`](CHANGELOG.md)）。
 
 版本号遵循 [语义化版本 2.0.0](https://semver.org/lang/zh-CN/)（`主版本.次版本.修订号`）：
 

@@ -2,7 +2,7 @@
 name: windows-downloads-relocator
 description: "Relocate the Windows Downloads known folder to a dedicated sub-folder on another drive, with pre-flight checks, verified per-file migration, complete registry backups and an honest pass/fail report. Fixes the hidden Local Downloads GUID, rejects bare drive roots so the whole disk never becomes Downloads, keeps the localized display name and icon via desktop.ini, syncs common apps download paths, and includes a dry-run, a rollback script and an automated selftest. 将 Windows 下载已知文件夹安全迁移到其他盘：迁移前全面检查、逐文件校验迁移、注册表完整备份与明确失败汇总；修复隐藏的 Local Downloads 注册表项、拒绝把整盘设为下载目录、保持中文名与图标、同步浏览器与微信 / QQ / 百度网盘 / 夸克网盘 / 阿里云盘下载路径，并提供只读预览、回退脚本与自动自检。"
 agent_created: true
-version: 1.1.0
+version: 1.1.1
 ---
 
 # Windows 下载文件夹迁移器 / Downloads Relocator
@@ -10,8 +10,8 @@ version: 1.1.0
 把「下载」已知文件夹（Known Folder）从 C 盘迁到**其他盘上的专用子文件夹**，并让系统、导航栏、显示名称、图标和常用软件都指向新位置。
 *Moves the Downloads Known Folder to a dedicated sub-folder on another drive and keeps the OS, nav pane, localized name, icon and apps in sync.*
 
-> v1.1.0 重点修复了 v1.0.0 的三个可靠性缺陷：脚本无法启动、`-DryRun` 仍写备份、失败被报告成成功。详见 `CHANGELOG.md`。
-> *v1.1.0 fixes three v1.0.0 reliability defects: the script could not start, DryRun still wrote backups, and failures were reported as success.*
+> v1.1.0 重点修复了 v1.0.0 的三个可靠性缺陷：脚本无法启动、`-DryRun` 仍写备份、失败被报告成成功；v1.1.1 为分发包兼容性修订（SkillHub 纯文本包），**功能代码无变化**。详见 `CHANGELOG.md`。
+> *v1.1.0 fixes three v1.0.0 reliability defects: the script could not start, DryRun still wrote backups, and failures were reported as success. v1.1.1 is a packaging-only revision with no functional changes.*
 
 ---
 

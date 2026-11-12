@@ -31,7 +31,7 @@
     powershell -ExecutionPolicy Bypass -File scripts/restore_downloads.ps1 -Manifest "$env:USERPROFILE\Downloads_Manifest_20261112-003000.json" -DryRun
 
 .NOTES
-    Windows PowerShell 5.1+. Author: banshan83 | v1.1.0
+    Windows PowerShell 5.1+. Author: banshan83 | v1.1.1
 #>
 [CmdletBinding()]
 param(
@@ -48,7 +48,7 @@ if (-not (Test-Path -LiteralPath $common)) { Write-Output "[ERROR] Missing helpe
 $c = Get-DlrConstants
 
 try {
-    Write-Output '===== Downloads Relocation Rollback v1.1.0 ====='
+    Write-Output '===== Downloads Relocation Rollback v1.1.1 ====='
     Write-DlrLog INFO ("Mode: " + $(if ($WhatIf) { 'DRY RUN (writes nothing)' } else { 'APPLY' }))
 
     if (-not $Manifest) {

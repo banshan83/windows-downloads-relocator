@@ -64,7 +64,7 @@
 
 .NOTES
     Windows PowerShell 5.1+. No administrator rights required (HKCU only).
-    Author: banshan83 | v1.1.0
+    Author: banshan83 | v1.1.1
 #>
 [CmdletBinding()]
 param(
@@ -117,7 +117,7 @@ function Stop-Dlr {
 
 try {
     # ==== 0. Environment ========================================================
-    Write-Output '===== Windows Downloads Relocator v1.1.0 ====='
+    Write-Output '===== Windows Downloads Relocator v1.1.1 ====='
     if ($PSVersionTable.PSVersion.Major -lt 5) {
         Stop-Dlr 2 "Windows PowerShell 5.1 or newer is required (found $($PSVersionTable.PSVersion))."
     }
@@ -272,7 +272,7 @@ try {
 
     $manifestObj = [ordered]@{
         Skill        = 'windows-downloads-relocator'
-        Version      = '1.1.0'
+        Version      = '1.1.1'
         Timestamp     = (Get-Date).ToString('o')
         OldPath       = $current
         NewPath       = $target

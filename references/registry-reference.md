@@ -1,7 +1,7 @@
 # 注册表与已知文件夹参考（Windows 下载目录迁移）
 
-本文件记录迁移「下载」已知文件夹时必须处理的注册表项、备份格式、易踩的坑以及回退方法。适用 **v1.1.0**。
-*Registry keys, backup format, traps and rollback for v1.1.0.*
+本文件记录迁移「下载」已知文件夹时必须处理的注册表项、备份格式、易踩的坑以及回退方法。适用 **v1.1.1**。
+*Registry keys, backup format, traps and rollback for v1.1.1.*
 
 ## 1. 涉及的两个注册表键
 
@@ -75,7 +75,7 @@ v1.0.0 手写 `.reg` 文件，把原本的 `REG_EXPAND_SZ` 降级成了 `REG_SZ`
 
 ```json
 {
-  "Skill": "windows-downloads-relocator", "Version": "1.1.0",
+  "Skill": "windows-downloads-relocator", "Version": "1.1.1",
   "OldPath": "C:\\Users\\<user>\\Downloads", "NewPath": "F:\\Downloads",
   "MoveExisting": true, "SourceFiles": 220, "SourceBytes": 856932352,
   "RegistryBackups": ["...UserShellFolders_...reg", "...ShellFolders_...reg"],

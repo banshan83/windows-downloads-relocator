@@ -1,6 +1,6 @@
 # 常见软件默认下载目录位置 / App download locations
 
-把系统「下载」文件夹迁移后，多数软件仍按各自独立配置保存文件，需要单独更新。本文件列出常见桌面程序的下载路径存储位置、兼容矩阵与手动入口，供 `set_app_downloads.ps1` 参考。适用 **v1.1.0**。
+把系统「下载」文件夹迁移后，多数软件仍按各自独立配置保存文件，需要单独更新。本文件列出常见桌面程序的下载路径存储位置、兼容矩阵与手动入口，供 `set_app_downloads.ps1` 参考。适用 **v1.1.1**。
 
 *After relocating the system Downloads folder, most apps keep their own download settings. This file lists where common desktop apps store that path, the support matrix, and manual fallbacks.*
 
