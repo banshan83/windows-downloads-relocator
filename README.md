@@ -49,10 +49,10 @@
 > | 包 | 用途 | 内容 |
 > |---|---|---|
 > | `windows-downloads-relocator.zip` | GitHub Release / 通用完整版 | 排除隐藏文件，保留 `LICENSE` |
-> | `windows-downloads-relocator-skillhub.zip` | **SkillHub 专用** | 仅保留 `.md` / `.ps1` / `.png` / `.svg` |
+> | `windows-downloads-relocator-skillhub.zip` | **SkillHub 专用** | **仅 `.md` / `.ps1` 纯文本**，零二进制、零隐藏文件 |
 >
-> SkillHub 已确认拒绝三类文件：隐藏文件（`.gitignore`）、无扩展名文件（`LICENSE`）、`.template` 后缀（`desktop.ini.template`）。因此 `.gitignore` 只留在 GitHub 仓库；`desktop.ini` 由 `scripts/relocate_downloads.ps1` 内嵌生成、内容并入 `references/registry-reference.md`；MIT 许可信息内嵌本页。从分发包内运行自检请加 `-DistributionMode`。
-> *SkillHub rejects dotfiles, extension-less files and .template files; a dedicated zip is produced for it.*
+> SkillHub 已确认拒绝四类文件：隐藏文件（`.gitignore`）、无扩展名文件（`LICENSE`）、`.template` 后缀（`desktop.ini.template`）、**以及任何二进制文件（`icon.png`）**。因此 SkillHub 包被收紧为纯文本：`.gitignore` 只留在 GitHub 仓库；`desktop.ini` 由 `scripts/relocate_downloads.ps1` 内嵌生成、内容并入 `references/registry-reference.md`；MIT 许可信息内嵌本页；示意图改为 `references/diagram.md` 里的 SVG 源码；渲染版图片与图标只留在仓库 / 完整包。打包器还会做**二进制内容检测**，不再只靠扩展名判断。从分发包内运行自检请加 `-DistributionMode`。
+> *SkillHub rejects dotfiles, extension-less files, .template files and all binary content; a strictly text-only zip is produced for it.*
 
 ---
 
@@ -75,14 +75,15 @@ windows-downloads-relocator/
 ├── references/
 │   ├── registry-reference.md         # 注册表项、两个 GUID、整盘陷阱、备份与回退
 │   ├── app-paths.md                  # 各软件下载目录位置、兼容矩阵与手动入口
-│   └── FAQ.md                        # 高频问题集中答复
-└── assets/
-    ├── example-before-after.svg      # 迁移前 / 后对比示意图
-    └── icon.png                      # Skill 图标
+│   ├── FAQ.md                        # 高频问题集中答复
+│   └── diagram.md                    # 示意图说明 + 完整 SVG 源码（纯文本）
+└── assets/                           # 仅仓库 / 完整包：渲染示意图与图标，非运行时依赖
+    ├── example-before-after.svg
+    └── icon.png
 ```
 
-> 文档中引用的每个文件都随仓库提供，`selftest.ps1` 会自动核对。
-> *Every documented path is checked by selftest.ps1.*
+> SKILL.md 与 README 中指向**包内文件**的相对路径都由 `selftest.ps1` 自动核对；仓库展示资源用绝对 URL 标注，不属于包内承诺。`references/diagram.md` 保证纯文本包里也有完整示意图内容。
+> *Selftest verifies every in-package relative path; repo-only images are referenced by absolute URL.*
 
 ---
 
@@ -207,7 +208,10 @@ powershell -ExecutionPolicy Bypass -File scripts/selftest.ps1
 
 ## 示意图 / Diagram
 
-![迁移前 / 后对比](assets/example-before-after.svg)
+![迁移前 / 后对比](https://raw.githubusercontent.com/banshan83/windows-downloads-relocator/main/assets/example-before-after.svg)
+
+> 上图是**仓库展示资源**（用绝对 URL 引用），不是运行时依赖。SkillHub 纯文本包不含任何图片；示意图的完整 SVG 源码与说明见 [`references/diagram.md`](references/diagram.md)，两个包都带。
+> *The rendered image is a repo-only asset. All packages ship the plain-text SVG source instead.*
 
 展示中性迁移叙事：从 `C:\Users\<用户>\Downloads` 到其他盘上的专用子文件夹（系统名与图标、旧文件已迁移）。
 *A neutral C-drive → other-drive migration; the whole-drive failure is not depicted.*

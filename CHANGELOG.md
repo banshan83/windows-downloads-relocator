@@ -9,7 +9,9 @@
 
 ### Fixed（关键缺陷 / critical）
 
-- **SkillHub 分发包文件类型不兼容**：平台拒绝隐藏文件（`.gitignore`）、无扩展名文件（`LICENSE`）与非常规后缀（`desktop.ini.template`）。现固定产出两份包：`windows-downloads-relocator.zip`（GitHub / 通用）与 `windows-downloads-relocator-skillhub.zip`（仅含平台接受的 `.md` / `.ps1` / `.png` / `.svg`）。`desktop.ini` 改由主脚本内嵌生成，模板文件移除、内容并入 `references/registry-reference.md`；MIT 许可信息写入 README，避免包内出现断链。
+- **SkillHub 禁止二进制文件**：平台提示「不支持的文件类型: icon.png（禁止上传二进制文件）」。此前 SkillHub 包里仍带 864,490 B 的 PNG 图标（占整包 94%），被拒收后平台只统计已接受的文本，于是 892 KB 的包显示成 **133 KB**（剩余文本解压后恰为 136,755 B ≈ 133.5 KiB）。现 SkillHub 包收紧为**仅 `.md` / `.ps1` 纯文本**，打包器新增二进制内容检测（NUL 字节 / 常见魔数 / UTF-8 可解码性），不再只看扩展名；示意图转为 `references/diagram.md` 中的完整 SVG 源码，图标与渲染图只留在仓库 / 通用完整包，文档改用绝对 URL 引用以免出现包内悬空引用。
+  *SkillHub rejects binary uploads; its zip is now strictly text-only with content-level binary detection at build time.*
+- **SkillHub 分发包文件类型不兼容**：平台拒绝隐藏文件（`.gitignore`）、无扩展名文件（`LICENSE`）与非常规后缀（`desktop.ini.template`）。现固定产出两份包：`windows-downloads-relocator.zip`（GitHub / 通用，含 `LICENSE` 与图片资源）与 `windows-downloads-relocator-skillhub.zip`（纯文本）。`desktop.ini` 改由主脚本内嵌生成，模板文件移除、内容并入 `references/registry-reference.md`；MIT 许可信息写入 README，避免包内出现断链。
   *SkillHub rejects dotfiles, extension-less LICENSE and .template files; a dedicated SkillHub zip is now produced alongside the full one.*
 - **分发包被 SkillHub 拒收**：包内含 `.gitignore`，而 SkillHub 不允许上传隐藏文件。打包流程现统一排除所有以 `.` 开头的文件 / 目录；`.gitignore` 仅保留在 GitHub 仓库。`selftest.ps1` 新增 `-DistributionMode`，便于从分发包内运行自检。
   *SkillHub rejects dotfiles; the distribution zip now excludes `.gitignore` and all hidden entries.*

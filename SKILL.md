@@ -171,10 +171,13 @@ powershell -ExecutionPolicy Bypass -File scripts/restore_downloads.ps1 -BackupDi
 | `references/registry-reference.md` | 注册表项、GUID、备份格式、验证清单，含 `desktop.ini` 完整内容 |
 | `references/app-paths.md` | 软件配置位置、兼容矩阵、手动入口 |
 | `references/FAQ.md` | 高频问题集中答复 |
-| `assets/example-before-after.svg` | 迁移前 / 后路径对比示意图 |
-| `assets/icon.png` | Skill 图标 |
+| `references/diagram.md` | 迁移前 / 后示意图说明 + 完整 SVG 源码（纯文本，每个分发包都带） |
+
+> 渲染版图片与 PNG 图标属于**仓库展示资源**，只在 GitHub 仓库与通用完整包中提供，
+> 不是运行时依赖；SkillHub 分发包为纯文本（仅 `.md` / `.ps1`），不含任何二进制或图片文件。
+> *Images are repo-only assets, never runtime dependencies. The SkillHub package is text-only.*
 
 ## 示意图 / Diagram
 
-`assets/example-before-after.svg` 展示中性迁移叙事：`C:\Users\<用户>\Downloads` → 其他盘上的专用子文件夹（系统名与图标、旧文件已迁移）。图中**不描绘整盘事故**。
-*The bundled SVG shows a plain C-drive → other-drive migration, not the whole-drive failure.*
+`references/diagram.md` 内含迁移前 / 后路径对比示意图的完整 SVG 源码与说明：中性叙事 `C:\Users\<用户>\Downloads` → 其他盘上的专用子文件夹（系统名与图标、旧文件已迁移）。图中**不描绘整盘事故**。
+*The plain-text SVG source ships with every package; the rendered image lives in the GitHub repo only. The whole-drive failure is not depicted.*

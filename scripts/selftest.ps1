@@ -76,7 +76,7 @@ $required = @(
     'scripts\restore_downloads.ps1', 'scripts\selftest.ps1',
     'scripts\lib\DownloadsCommon.ps1',
     'references\registry-reference.md', 'references\app-paths.md', 'references\FAQ.md',
-    'assets\example-before-after.svg', 'assets\icon.png'
+    'references\diagram.md'
 )
 # .gitignore is a repo-only dotfile. SkillHub rejects hidden files, so the
 # distribution zip never contains it. Only the source checkout must have it.
@@ -156,12 +156,23 @@ Write-Output ''
 # --------------------------------------------------------------- 6. docs ------
 Write-Output '--- 6. Documented assets actually ship ---'
 $docText = $skillText + "`n" + $readme
-$refs = @([regex]::Matches($docText, '(?<![A-Za-z0-9_])((?:scripts|references|assets)/[A-Za-z0-9_\-./\\]+\.[A-Za-z0-9]+)') |
+# Absolute URLs point at repo-only display assets (images), which are NOT part of
+# any text-only distribution zip. Strip them before checking in-package paths.
+$localDocText = $docText -replace 'https?://\S+', ''
+$refs = @([regex]::Matches($localDocText, '(?<![A-Za-z0-9_])((?:scripts|references|assets)/[A-Za-z0-9_\-./\\]+\.[A-Za-z0-9]+)') |
           ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 foreach ($r in $refs) {
     $p = Join-Path $SkillRoot ($r -replace '/', '\')
     Assert-True -Name "documented path exists: $r" -Condition (Test-Path -LiteralPath $p)
 }
+# SkillHub rejects binary files, so its zip has no assets/ directory at all.
+# Guard against re-introducing a relative image path into SKILL.md / README.
+Assert-False -Name 'SKILL.md / README use no relative assets/ paths (SkillHub-safe)' `
+    -Condition ($localDocText -match 'assets/[A-Za-z0-9_\-./\\]+\.[A-Za-z0-9]+') `
+    -Detail 'use an absolute GitHub URL, or references/diagram.md for the SVG source'
+Assert-True -Name 'plain-text SVG diagram ships as a .md reference' `
+    -Condition ((Test-Path -LiteralPath (Join-Path $SkillRoot 'references\diagram.md')) -and
+                ((Get-Content -LiteralPath (Join-Path $SkillRoot 'references\diagram.md') -Raw -Encoding UTF8) -match '<svg'))
 $regRaw = Get-Content -LiteralPath (Join-Path $SkillRoot 'references\registry-reference.md') -Raw -Encoding UTF8
 Assert-True -Name 'desktop.ini spec has CLSID2 + LocalizedResourceName + IconResource' -Condition ($regRaw -match 'CLSID2=' -and $regRaw -match 'LocalizedResourceName=' -and $regRaw -match 'IconResource=' -and $mainRaw -match '\.ShellClassInfo')
 Write-Output ''
